@@ -12,3 +12,8 @@ wheels/
 
 # Environment
 .env
+
+# Generated folder
+screenshot/
+test-report/
+videos/
