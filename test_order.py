@@ -4,7 +4,7 @@ import tkinter as tk
 import allure
 from allure import severity_level
 from dotenv import load_dotenv
-from playwright.sync_api import Browser
+from playwright.sync_api import Browser, expect
 
 load_dotenv()
 
@@ -31,9 +31,7 @@ def test_order_item(browser: Browser):
 
     with allure.step("Home page"):
         page.goto(os.getenv("BASE_URL"))
-        homepage_img = page.screenshot(
-            full_page=True, path="screenshot/000_homepage.png"
-        )
+        homepage_img = page.screenshot(path="screenshot/sc001/000_homepage.png")
         allure.attach(
             homepage_img,
             name="home page",
@@ -44,7 +42,7 @@ def test_order_item(browser: Browser):
         page.locator("#btn-login").click()
         page.locator("#input-login-username").fill("admin")
         page.locator("#input-login-password").fill("admin123")
-        login_img = page.screenshot(full_page=True, path="screenshot/001_login.png")
+        login_img = page.screenshot(path="screenshot/sc001/001_login.png")
         allure.attach(
             login_img,
             name="login page",
@@ -54,24 +52,21 @@ def test_order_item(browser: Browser):
 
     with allure.step("Select first item"):
         page.locator("a:has-text('📱 Phones')").click()
-        page.get_by_title("Biru").nth(1).click()
-        page.get_by_text("+ Cart").nth(1).click()
-        first_item_img = page.screenshot(
-            full_page=True, path="screenshot/002_first_item.png"
-        )
+        page.get_by_text("iPhone 16 Pro Max").click()
+        page.locator('//*[@id="detail-color-options"]/label[2]/div').click()
+        first_item_img = page.screenshot(path="screenshot/sc001/002_first_item.png")
         allure.attach(
             first_item_img,
             name="first item page",
             attachment_type=allure.attachment_type.PNG,
         )
+        page.locator("#detail-btn-add-cart").click()
 
     with allure.step("Select second item"):
         page.locator("a:has-text('🖥️ Monitors')").click()
         page.get_by_title("Biru").nth(2).click()
         page.get_by_text("+ Cart").nth(2).click()
-        second_item_img = page.screenshot(
-            full_page=True, path="screenshot/003_second_item.png"
-        )
+        second_item_img = page.screenshot(path="screenshot/sc001/003_second_item.png")
         allure.attach(
             second_item_img,
             name="second item page",
@@ -81,9 +76,7 @@ def test_order_item(browser: Browser):
     with allure.step("Cart"):
         page.get_by_label("Open cart").click()
         page.get_by_text("Place Order →").click()
-        cart_item_img = page.screenshot(
-            full_page=True, path="screenshot/004_cart_item.png"
-        )
+        cart_item_img = page.screenshot(path="screenshot/sc001/004_cart_item.png")
         allure.attach(
             cart_item_img,
             name="cart item page",
@@ -96,9 +89,7 @@ def test_order_item(browser: Browser):
         page.locator("#order-card").fill("1234567812345678")
         page.locator("#order-month").select_option(value="08")
         page.locator("#order-year").select_option(value="2026")
-        pay_order_img = page.screenshot(
-            full_page=True, path="screenshot/005_pay_order.png"
-        )
+        pay_order_img = page.screenshot(path="screenshot/sc001/005_pay_order.png")
         allure.attach(
             pay_order_img,
             name="pay order page",
@@ -106,10 +97,61 @@ def test_order_item(browser: Browser):
         )
         page.get_by_text("Pay Now").click()
 
+    with allure.step("Log out"):
         page.get_by_text("Log out").click()
-        logout_img = page.screenshot(full_page=True, path="screenshot/006_logout.png")
+        logout_img = page.screenshot(path="screenshot/sc001/006_logout.png")
         allure.attach(
             logout_img,
             name="logout page",
             attachment_type=allure.attachment_type.PNG,
         )
+
+    context.close()
+
+    os.rename(page.video.path(), "videos/order.webm")
+
+
+@allure.id("SC002")
+@allure.label("negative case")
+@allure.feature("login")
+@allure.tag("login", "auth")
+@allure.severity(severity_level.CRITICAL)
+@allure.description("Login with username and password unregistered")
+def test_login_failed(browser: Browser):
+    context = browser.new_context(
+        viewport={"width": SCREEN_WIDTH, "height": SCREEN_HEIGHT},
+        record_video_dir="videos/",
+        record_video_size={"width": SCREEN_WIDTH, "height": SCREEN_HEIGHT},
+    )
+
+    page = context.new_page()
+
+    with allure.step("Home page"):
+        page.goto(os.getenv("BASE_URL"))
+        homepage_img = page.screenshot(path="screenshot/sc002/000_homepage.png")
+        allure.attach(
+            homepage_img,
+            name="home page",
+            attachment_type=allure.attachment_type.PNG,
+        )
+
+    with allure.step("Login page"):
+        page.locator("#btn-login").click()
+        page.locator("#input-login-username").fill("adminx")
+        page.locator("#input-login-password").fill("admin123x")
+        page.get_by_role("button").get_by_text("Log in").nth(1).click()
+
+        expect(page.locator("#toast-msg")).to_have_text(
+            "❌ Username atau password sala."
+        )
+
+        login_img = page.screenshot(path="screenshot/sc002/001_login.png")
+        allure.attach(
+            login_img,
+            name="login page",
+            attachment_type=allure.attachment_type.PNG,
+        )
+
+    context.close()
+
+    os.rename(page.video.path(), "videos/login_failed.webm")

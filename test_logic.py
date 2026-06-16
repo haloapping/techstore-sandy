@@ -1,6 +1,6 @@
 from string import punctuation
 
-# 1. srting number in ascending mode
+# 1. sorting number in ascending mode
 # input:  [6, 2, 9, 10, 8]
 # output: [2, 6, 8, 9, 10]
 
@@ -37,12 +37,13 @@ def unique_char(text):
 
     return "".join(unique_chars)
 
+
 print("Answer 2")
 print(unique_char("BANK BXX"))
 print(unique_char("NEGARA WAKANDA"), end="\n\n")
 
 
-# palindrome
+# 3. palindrome
 # input: grab
 # output: false
 
@@ -64,12 +65,12 @@ def is_palindrome(text):
     while left_idx < right_idx:
         if clean_chars[left_idx] != clean_chars[right_idx]:
             return False
-        
+
         left_idx += 1
         right_idx -= 1
 
     return True
-        
+
 
 print("Answer 3")
 print(is_palindrome("grab"))
